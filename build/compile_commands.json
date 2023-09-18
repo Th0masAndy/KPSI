@@ -1,0 +1,8 @@
+[
+{
+  "directory": "/home/andy/MPC/KPSI/build",
+  "command": "/usr/bin/c++ -I/home/andy/MPC/KPSI/Hashing -I/home/andy/MPC/KPSI/src -isystem /usr/local/include/SEAL-4.1 -g -std=gnu++17 -o src/CMakeFiles/kpsi.dir/main.cpp.o -c /home/andy/MPC/KPSI/src/main.cpp",
+  "file": "/home/andy/MPC/KPSI/src/main.cpp",
+  "output": "src/CMakeFiles/kpsi.dir/main.cpp.o"
+}
+]

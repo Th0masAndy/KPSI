@@ -1,0 +1,5 @@
+/home/andy/MPC/KPSI/build/CMakeFiles/edit_cache.dir
+/home/andy/MPC/KPSI/build/CMakeFiles/rebuild_cache.dir
+/home/andy/MPC/KPSI/build/src/CMakeFiles/kpsi.dir
+/home/andy/MPC/KPSI/build/src/CMakeFiles/edit_cache.dir
+/home/andy/MPC/KPSI/build/src/CMakeFiles/rebuild_cache.dir

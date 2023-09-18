@@ -1,0 +1,75 @@
+---
+Language:        Cpp
+# Based on the LLVM style
+BasedOnStyle:    LLVM
+AccessModifierOffset: -2
+
+# Indentation
+IndentWidth:     4
+TabWidth:        4
+UseTab:          Never
+BreakBeforeBraces: Attach
+ContinuationIndentWidth: 4
+
+# Column limit, typically 80 or 120
+ColumnLimit:     120
+
+# Alignment
+AlignAfterOpenBracket: Align
+AlignConsecutiveAssignments: false
+AlignConsecutiveBitFields: false
+AlignConsecutiveDeclarations: false
+AlignConsecutiveMacros: false
+AlignEscapedNewlines: Left
+AlignOperands: true
+AlignTrailingComments: true
+PointerAlignment: Left
+
+# Spaces
+SpaceBeforeAssignmentOperators: true
+SpaceBeforeCpp11BracedList: true
+SpaceBeforeCtorInitializerColon: true
+SpaceBeforeInheritanceColon: true
+SpaceBeforeParens: ControlStatements
+SpaceBeforeRangeBasedForLoopColon: true
+SpaceInEmptyParentheses: false
+SpacesBeforeTrailingComments: 1
+SpacesInAngles: false
+SpacesInContainerLiterals: true
+SpacesInCStyleCastParentheses: false
+SpacesInParentheses: false
+SpacesInSquareBrackets: false
+
+# Breaks
+AlwaysBreakTemplateDeclarations: Yes
+BreakBeforeTernaryOperators: true
+BreakConstructorInitializersBeforeComma: false
+BreakInheritanceList: BeforeColon
+BreakStringLiterals: true
+
+# Sorting includes
+IncludeBlocks: Preserve
+IncludeCategories:
+  - Regex:           '^"(llvm|llvm-c|clang|clang-c)/'
+    Priority:        2
+  - Regex:           '^(<.*>|".*")'
+    Priority:        1
+IncludeIsMainRegex: '(Test)?$'
+SortIncludes:    true
+
+# Comment reflow
+ReflowComments:  true
+CommentPragmas:  '^ IWYU pragma:'
+
+# Keep inline short functions in single line
+AllowShortFunctionsOnASingleLine: All
+AllowShortIfStatementsOnASingleLine: true
+AllowShortLoopsOnASingleLine: true
+
+# Minimize the breaks of consecutive lines
+MaxEmptyLinesToKeep: 1
+
+# Specify the order for #includes
+SortIncludes:    true
+...
+

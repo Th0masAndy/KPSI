@@ -1,0 +1,18 @@
+cmake_minimum_required(VERSION 3.13)
+
+project(KPSI VERSION 4.1.1 LANGUAGES CXX)
+
+set(CMAKE_CXX_STANDARD 17)
+
+set(PSI_ANALYTICS_SOURCE_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
+
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Release)
+endif()
+
+set(CMAKE_CXX_FLAGS_DEBUG "-g")
+set(CMAKE_CXX_FLAGS_RELEASE "-g -msse2 -O3")
+
+add_subdirectory(src)
