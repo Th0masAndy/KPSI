@@ -1,7 +1,18 @@
 #include <chrono>
 #include <emmintrin.h>
+#include <immintrin.h>
 #include <iostream>
 #include <vector>
+
+void vector_add_avx2(const int* a, const int* b, int* result, size_t count) {
+    // 假设count是8的倍数
+    for (size_t i = 0; i < count; i += 8) {
+        __m256i va = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(a + i));
+        __m256i vb = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(b + i));
+        __m256i vresult = _mm256_add_epi32(va, vb);
+        _mm256_storeu_si256(reinterpret_cast<__m256i*>(result + i), vresult);
+    }
+}
 
 void add_vectors(const int* a, const int* b, int* c, int n) {
     long long i;
@@ -43,9 +54,9 @@ class LagrangeInterpolation {
     std::vector<long long> x_values;
     std::vector<std::vector<int>> L;
 
-    LagrangeInterpolation(long long mod = 65537) : MOD(mod) {
-        x_values.resize(1024);
-        for (auto i = 0; i < 1024; i++) {
+    LagrangeInterpolation(int size, long long mod = 65537) : MOD(mod) {
+        x_values.resize(size);
+        for (auto i = 0; i < size; i++) {
             x_values[i] = i;
         }
         L.resize(x_values.size());
@@ -104,7 +115,7 @@ class LagrangeInterpolation {
             //     res[i] = (res[i] + Lk[i]) % MOD;
             // }
         }
-        for (auto k = 0; k < L.size(); k++) {
+        for (auto k = 0; k < y.size(); k++) {
             res[k] = res[k] % MOD;
         }
         return res;
@@ -123,25 +134,27 @@ class LagrangeInterpolation {
 };
 
 // int main() {
-//     size_t n = 1024;
+//     size_t n = 16;
 //     std::vector<long long> x(n);
 //     std::vector<int> y(n);
 
 //     for (auto i = 0; i < x.size(); i++) {
-//         x[i] = i;
-//         if (i % 6 == 0) {
-//             y[i] = 1;
-//         } else {
+//         if (i < 7) {
 //             y[i] = 0;
+//         } else {
+//             y[i] = 1;
 //         }
 //     }
 
-//     LagrangeInterpolation interpolator;
+//     LagrangeInterpolation interpolator(n);
 
 //     auto begin = std::chrono::high_resolution_clock::now();
 
-//     for (auto k = 0; k < 1024 * 80; k++) {
+//     for (auto k = 0; k < 1; k++) {
 //         auto res = interpolator.Interpolation(y);
+//         for (auto& e : res) {
+//             std::cout << e << " ";
+//         }
 //     }
 
 //     auto end = std::chrono::high_resolution_clock::now();

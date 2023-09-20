@@ -214,12 +214,80 @@ void GenPower(Evaluator& evaluator, RelinKeys& relin_keys, map<int, Ciphertext>&
 void computeBF(vector<vector<uint64_t>>& table, int seed, LagrangeInterpolation& interpolator,
                vector<vector<int>>& out) {
     for (auto b = 0; b < table.size(); b++) {
-        BloomFilter bf(1024, seed);
+        BloomFilter bf(1024 * 2, seed);
         bf.insert(table[b]);
         auto y_points = bf.AsVector();
         auto polycoeff = interpolator.Interpolation(y_points);
-        out[b * 16 + seed] = polycoeff;
+        out[b * 16 + seed] = y_points;
     }
+}
+
+Ciphertext range_check(Ciphertext& x_encrypted, Evaluator& evaluator, BatchEncoder& batch_encoder, Encryptor& encryptor,
+                       RelinKeys& relin_keys) {
+
+    size_t slot_count = batch_encoder.slot_count();
+
+    // vector<uint64_t> one_mat(slot_count, 1ULL);
+    // Plaintext one_pt;
+    // Ciphertext one;
+    // batch_encoder.encode(one_mat, one_pt);
+    // encryptor.encrypt(one_pt, one);
+
+    Ciphertext x2, x4, x8;
+    evaluator.multiply(x_encrypted, x_encrypted, x2);
+    evaluator.relinearize_inplace(x2, relin_keys);
+    evaluator.multiply(x2, x2, x4);
+    evaluator.relinearize_inplace(x4, relin_keys);
+    evaluator.multiply(x4, x4, x8);
+    evaluator.relinearize_inplace(x8, relin_keys);
+
+    Ciphertext result;
+
+    vector<int> coefficients = {0,     45446, 16209, 55369, 35707, 34237, 61692, 49322,
+                                22187, 32644, 13482, 9661,  12344, 49683, 64541, 21772};
+
+    // 初始化结果为 a_0
+    vector<Plaintext> coeff_pt(16);
+    for (auto i = 0; i < 16; i++) {
+        vector<uint64_t> mat(slot_count, coefficients[i]);
+        Plaintext pt;
+        batch_encoder.encode(mat, pt);
+        coeff_pt[i] = pt;
+    }
+
+    encryptor.encrypt(coeff_pt[0], result);
+
+    vector<Ciphertext> base_power = {x_encrypted, x2, x4, x8};
+
+    vector<Ciphertext> power_of_x(16);
+    for (auto i = 1; i < 16; i++) {
+        Ciphertext res;
+        auto first = true;
+        auto index = i;
+        for (auto j = 0; j < 4; j++) {
+            if (index & 1) {
+                if (first) {
+                    res = base_power[j];
+                    first = false;
+                } else {
+                    evaluator.multiply_inplace(res, base_power[j]);
+                    evaluator.relinearize_inplace(res, relin_keys);
+                }
+            }
+            index = index >> 1;
+        }
+        power_of_x[i] = res;
+    }
+
+    for (size_t i = 1; i < 16; i++) {
+
+        Ciphertext product;
+        evaluator.multiply_plain(power_of_x[i], coeff_pt[i], product);
+
+        evaluator.add_inplace(result, product);
+    }
+
+    return result;
 }
 
 int main() {
@@ -241,19 +309,22 @@ int main() {
     // vector<vector<uint64_t>> server_inputs(80);
     // vector<vector<vector<uint64_t>>> server_tables;
     // for (auto& vec : server_inputs) {
-    //     vec.resize(50000);
+    //     vec.resize(88750);
     //     for (auto& e : vec) {
     //         e = rand();
     //     }
     // }
+    // size_t max_bin_size = 0;
     // for (auto& vec : server_inputs) {
     //     Simplehash simple_table(1024);
     //     simple_table.Insert(vec);
     //     server_tables.push_back(simple_table.GetVector());
-    //     cout << simple_table.max_bin_size << endl;
+    //     max_bin_size = std::max(simple_table.max_bin_size, max_bin_size);
     // }
 
-    // LagrangeInterpolation interpolator;
+    // cout << "Max Observe bin size: " << max_bin_size << endl;
+
+    // LagrangeInterpolation interpolator(2048);
 
     // vector<vector<vector<int>>> poly_coeffs;
     // poly_coeffs.resize(server_tables.size());
@@ -291,8 +362,6 @@ int main() {
     // offline_end = std::chrono::high_resolution_clock::now();
     // offline_elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(offline_end - offline_begin);
     // printf("Time measured: %.3f seconds.\n", offline_elapsed.count() * 1e-9);
-
-    // exit(0);
 
     EncryptionParameters parms(scheme_type::bfv);
     size_t poly_modulus_degree = 8192 * 2;
@@ -411,7 +480,7 @@ int main() {
         coeffs[i] = coeff;
     }
 
-    for (auto part = 0; part < 50; part++) {
+    for (auto part = 0; part < 80; part++) {
         for (auto i = 0; i < 32; i++) {
             block[i] = zero;
             evaluator.add_plain_inplace(block[i], coeffs[i][0]);
@@ -451,14 +520,8 @@ int main() {
         elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin);
         printf("Time measured: %.3f seconds.\n", elapsed.count() * 1e-9);
     }
-    for (auto i = 0; i < 4; i++) {
-        evaluator.square_inplace(sum);
-        evaluator.relinearize_inplace(sum, relin_keys);
-        // cout << i << "    + Noise budget in result: " <<
-        // decryptor.invariant_noise_budget(sum) << " bits" << endl;
-        end = std::chrono::high_resolution_clock::now();
-        elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin);
-    }
+
+    range_check(sum, evaluator, batch_encoder, encryptor, relin_keys);
 
     filebuf buf;
     if (buf.open("./cipher_out", ios::out) == nullptr) {

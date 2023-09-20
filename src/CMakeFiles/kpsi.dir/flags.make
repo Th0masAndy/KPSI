@@ -6,5 +6,5 @@ CXX_DEFINES =
 
 CXX_INCLUDES = -I/home/andy/MPC/KPSI/Hashing -I/home/andy/MPC/KPSI/src -isystem /usr/local/include/SEAL-4.1
 
-CXX_FLAGS = -g -msse2 -O3 -std=gnu++17
+CXX_FLAGS = -g -msse2 -mavx2 -O3 -std=gnu++17
 

@@ -12,7 +12,7 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
 endif()
 
-set(CMAKE_CXX_FLAGS_DEBUG "-g")
-set(CMAKE_CXX_FLAGS_RELEASE "-g -msse2 -O3")
+set(CMAKE_CXX_FLAGS_DEBUG "-g -msse2 -mavx2 -O3")
+set(CMAKE_CXX_FLAGS_RELEASE "-g -msse2 -mavx2 -O3")
 
 add_subdirectory(src)

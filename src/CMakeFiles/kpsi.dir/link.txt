@@ -1,1 +1,1 @@
-/usr/bin/c++ -g -msse2 -O3 CMakeFiles/kpsi.dir/main.cpp.o -o ../kpsi  /usr/local/lib/libseal-4.1.a 
+/usr/bin/c++ -g -msse2 -mavx2 -O3 CMakeFiles/kpsi.dir/main.cpp.o -o ../kpsi  /usr/local/lib/libseal-4.1.a 
